@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>Convertly — Unit Converter</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Convertly home">
+        <span class="brand-mark" aria-hidden="true">↔</span>
+        <span>convertly</span>
+      </a>
+      <span class="topbar-note">A little clarity for everyday conversions</span>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div class="eyebrow"><span class="eyebrow-dot"></span> SIMPLE UNIT CONVERTER</div>
+      <h1 id="page-title">Make every unit<br><span>make sense.</span></h1>
+      <p class="intro">Quick, accurate conversions for the things you measure every day.</p>
+    </section>
+
+    <section class="converter-card" aria-label="Unit converter">
+      <div class="card-heading">
+        <div>
+          <h2>Convert units</h2>
+          <p>Choose a category and enter a value to get started.</p>
+        </div>
+        <span class="sparkle" aria-hidden="true">✳</span>
+      </div>
+
+      <form method="post">
+        <label class="field-label" for="category">CATEGORY</label>
+        <select id="category" name="category">
+          {% for category in categories %}
+          <option value="{{ category }}" {% if form.category == category %}selected{% endif %}>{{ category }}</option>
+          {% endfor %}
+        </select>
+
+        <div class="conversion-row">
+          <div class="conversion-field">
+            <label class="field-label" for="value">VALUE</label>
+            <input id="value" name="value" type="number" step="any" placeholder="e.g. 12.5"
+                   value="{{ form.value }}" required>
+          </div>
+          <div class="conversion-field">
+            <label class="field-label" for="from_unit">FROM</label>
+            <select id="from_unit" name="from_unit"></select>
+          </div>
+        </div>
+
+        <div class="swap-divider" aria-hidden="true"><span>↓</span></div>
+
+        <label class="field-label" for="to_unit">TO</label>
+        <select id="to_unit" name="to_unit"></select>
+
+        <button type="submit">Convert <span aria-hidden="true">→</span></button>
+      </form>
+
+      {% if error %}
+      <div class="message error" role="alert">{{ error }}</div>
+      {% elif result is not none %}
+      <div class="result-panel" role="status" aria-live="polite">
+        <span class="result-label">YOUR RESULT</span>
+        <p>{{ form.value }} <span>{{ form.from_unit }}</span></p>
+        <div class="result-answer">
+          <span class="equals">=</span>
+          <strong>{{ "{:,.8g}".format(result) }}</strong>
+          <span>{{ form.to_unit }}</span>
+        </div>
+      </div>
+      {% endif %}
+    </section>
+
+    <footer>Made for curious minds <span aria-hidden="true">✦</span></footer>
+  </main>
+
+  <script>
+    const unitsByCategory = {{ categories | tojson }};
+    const initialFrom = {{ form.from_unit | tojson }};
+    const initialTo = {{ form.to_unit | tojson }};
+    const categorySelect = document.getElementById("category");
+    const fromSelect = document.getElementById("from_unit");
+    const toSelect = document.getElementById("to_unit");
+
+    function updateUnits(category, fromValue, toValue) {
+      const units = Object.keys(unitsByCategory[category] || {});
+      for (const [select, preferred] of [[fromSelect, fromValue], [toSelect, toValue]]) {
+        select.replaceChildren(...units.map((unit) => {
+          const option = document.createElement("option");
+          option.value = unit;
+          option.textContent = unit;
+          return option;
+        }));
+        if (units.includes(preferred)) select.value = preferred;
+      }
+    }
+
+    updateUnits(categorySelect.value, initialFrom, initialTo);
+    categorySelect.addEventListener("change", () => updateUnits(categorySelect.value));
+  </script>
+</body>
+</html>
