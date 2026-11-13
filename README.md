@@ -2,6 +2,10 @@
 
 A small Python web app for converting length, mass, temperature, volume, and area.
 
+## Open without localhost
+
+To use the converter as a regular local webpage without starting Python, double-click `converter.html` in File Explorer. It opens directly in your browser and conversions work offline. Keep the `static` folder beside the HTML file so its styling loads.
+
 ## Run locally
 
 1. Install Python 3.10 or newer.
